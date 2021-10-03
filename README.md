@@ -26,6 +26,6 @@ While navigating, the region containing the current node will be highlighted. Th
 
 ## Progress and next steps
 
-This package is only experimental; it's more a proof-of-concept than a useful tool. The eventual goal would be to add Tree Sitter support directly to Symex.el rather than creating a separate package, so this project's lifespan will end if that happens.
+This package is only experimental; it's more a proof-of-concept than a useful tool. The eventual goal would be to [add Tree Sitter support directly to Symex.el](https://github.com/countvajhula/symex.el/issues/3) rather than creating a separate package, so this project's lifespan will end if that happens.
 
 The next step for this project is to provide tree-manipulation functionality in order to provide proper structural editing to any supported language. At that point, the purpose of this project will be complete: it will have proved that Symex.el can be extended to support Tree Sitter.
