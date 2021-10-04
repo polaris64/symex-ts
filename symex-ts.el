@@ -148,8 +148,6 @@
   ;; Launch hydra
   (hydra-symex-ts/body))
 
-(global-set-key (kbd "<f2>") #'symex-ts-launch)
-
 
 (provide 'symex-ts)
 ;; symex-ts.el ends here
