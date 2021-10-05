@@ -38,7 +38,8 @@
     (delete-overlay symex-ts--current-overlay)))
 
 (defun symex-ts--update-overlay (node)
-  "Update the highlight overlay to match the start/end position of NODE."
+  "Update the highlight overlay to match the start/end position
+of NODE."
   (when symex-ts--current-overlay
     (delete-overlay symex-ts--current-overlay))
   (setq-local symex-ts--current-overlay (make-overlay (tsc-node-start-position node) (tsc-node-end-position node)))
@@ -51,7 +52,8 @@
   (symex-ts--update-overlay symex-ts--current-node))
 
 (defun symex-ts--get-topmost-node (node)
-  "Return the highest node in the tree starting from NODE that has the same start position."
+  "Return the highest node in the tree starting from NODE that
+has the same start position."
   (let ((node-start-pos (tsc-node-start-position node))
         (parent (tsc-get-parent node)))
     (if parent
@@ -73,7 +75,8 @@
   (message (tsc-node-to-sexp symex-ts--current-node)))
 
 (defun symex-ts-get-current-node ()
-  "Return the current node. Automatically set it to the node at point if necessary."
+  "Return the current node.
+Automatically set it to the node at point if necessary."
   (unless symex-ts--current-node
     (symex-ts-set-current-node-from-point))
   symex-ts--current-node)
@@ -90,7 +93,8 @@
 
 
 (defun symex-ts-move-prev-sibling ()
-  "Move the point to the current node's previous sibling if possible."
+  "Move the point to the current node's previous sibling if
+possible."
   (interactive)
   (let ((target-node (tsc-get-prev-named-sibling (symex-ts-get-current-node))))
     (when target-node (symex-ts--set-current-node target-node))))
