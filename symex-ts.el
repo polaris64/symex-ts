@@ -63,6 +63,26 @@ has the same start position."
             node))
       node)))
 
+(defun symex-ts--descend-to-child-with-sibling (node)
+  "Descend from NODE to first child recursively until the child
+node has a sibling or is a leaf."
+  (let ((child (tsc-get-nth-named-child node 0)))
+    (if child
+        (if (or (tsc-get-prev-named-sibling child) (tsc-get-next-named-sibling child))
+            child
+          (symex-ts--descend-to-child-with-sibling child))
+      node)))
+
+(defun symex-ts--ascend-to-parent-with-sibling (node)
+  "Ascend from NODE to parent recursively until the parent node has
+a sibling or is the root."
+  (let ((parent (tsc-get-parent node)))
+    (if parent
+        (if (or (tsc-get-prev-named-sibling parent) (tsc-get-next-named-sibling parent))
+            parent
+          (symex-ts--ascend-to-parent-with-sibling parent))
+      node)))
+
 (defun symex-ts--after-tree-modification ()
   "Handle any tree modification."
   (symex-ts--delete-overlay)
@@ -108,13 +128,13 @@ possible."
 (defun symex-ts-move-parent ()
   "Move the point to the current node's parent if possible."
   (interactive)
-  (let ((target-node (tsc-get-parent (symex-ts-get-current-node))))
+  (let ((target-node (symex-ts--ascend-to-parent-with-sibling (symex-ts-get-current-node))))
     (when target-node (symex-ts--set-current-node target-node))))
 
 (defun symex-ts-move-child ()
   "Move the point to the current node's first child if possible."
   (interactive)
-  (let ((target-node (tsc-get-nth-named-child (symex-ts-get-current-node) 0)))
+  (let ((target-node (symex-ts--descend-to-child-with-sibling (symex-ts-get-current-node))))
     (when target-node (symex-ts--set-current-node target-node))))
 
 (defun symex-ts-delete-node ()
