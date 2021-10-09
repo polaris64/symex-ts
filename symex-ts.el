@@ -84,6 +84,24 @@ a sibling or is the root."
           (symex-ts--ascend-to-parent-with-sibling parent))
       node)))
 
+(defun symex-ts--move-with-count (fn &optional count)
+  "Move the point from the current node if possible.
+
+Movement is defined by FN, which should be a function which
+returns the appropriate neighbour node.
+
+Move COUNT times, defaulting to 1."
+  (let ((target-node nil)
+        (cursor (symex-ts-get-current-node)))
+    (dotimes (_ (or count 1))
+      (setq cursor (or (funcall fn cursor) cursor))
+      (when cursor (setq target-node cursor)))
+    (when target-node (symex-ts--set-current-node target-node)))
+
+  ;; Return nil to signal to Symex that the movement has been
+  ;; completed
+  nil)
+
 (defun symex-ts--after-tree-modification ()
   "Handle any tree modification."
   (symex-ts--delete-overlay)
@@ -113,30 +131,33 @@ Automatically set it to the node at point if necessary."
     (symex-ts--get-topmost-node (tsc-get-named-descendant-for-position-range root p p))))
 
 
-(defun symex-ts-move-prev-sibling ()
-  "Move the point to the current node's previous sibling if
-possible."
-  (interactive)
-  (let ((target-node (tsc-get-prev-named-sibling (symex-ts-get-current-node))))
-    (when target-node (symex-ts--set-current-node target-node))))
+(defun symex-ts-move-prev-sibling (&optional count)
+  "Move the point to the current node's previous sibling if possible.
 
-(defun symex-ts-move-next-sibling ()
-  "Move the point to the current node's next sibling if possible."
+Move COUNT times, defaulting to 1."
   (interactive)
-  (let ((target-node (tsc-get-next-named-sibling (symex-ts-get-current-node))))
-    (when target-node (symex-ts--set-current-node target-node))))
+  (symex-ts--move-with-count #'tsc-get-prev-named-sibling count))
 
-(defun symex-ts-move-parent ()
-  "Move the point to the current node's parent if possible."
-  (interactive)
-  (let ((target-node (symex-ts--ascend-to-parent-with-sibling (symex-ts-get-current-node))))
-    (when target-node (symex-ts--set-current-node target-node))))
+(defun symex-ts-move-next-sibling (&optional count)
+  "Move the point to the current node's next sibling if possible.
 
-(defun symex-ts-move-child ()
-  "Move the point to the current node's first child if possible."
+Move COUNT times, defaulting to 1."
   (interactive)
-  (let ((target-node (symex-ts--descend-to-child-with-sibling (symex-ts-get-current-node))))
-    (when target-node (symex-ts--set-current-node target-node))))
+  (symex-ts--move-with-count #'tsc-get-next-named-sibling count))
+
+(defun symex-ts-move-parent (&optional count)
+  "Move the point to the current node's parent if possible.
+
+Move COUNT times, defaulting to 1."
+  (interactive)
+  (symex-ts--move-with-count #'symex-ts--ascend-to-parent-with-sibling count))
+
+(defun symex-ts-move-child (&optional count)
+  "Move the point to the current node's first child if possible.
+
+Move COUNT times, defaulting to 1."
+  (interactive)
+  (symex-ts--move-with-count #'symex-ts--descend-to-child-with-sibling count))
 
 (defun symex-ts-delete-node ()
   "Delete the current node."
