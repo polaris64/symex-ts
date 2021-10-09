@@ -24,7 +24,8 @@
 
 (defface symex-ts-current-node-face
   '((t :inherit highlight :extend nil))
-  "Face used to highlight the current tree node.")
+  "Face used to highlight the current tree node."
+  :group 'symex-faces)
 
 
 (defvar symex-ts--current-node nil "The current Tree Sitter node.")
