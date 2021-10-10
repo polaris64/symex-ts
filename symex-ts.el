@@ -113,7 +113,7 @@ Return a Symex move (list with x,y node offsets tagged with
 
     ;; Return the Symex move that was executed, or nil to signify that
     ;; the movement failed
-    (when (not (equal '(0 0) move)) (list 'move move))))
+    (when (not (equal '(0 0) move)) (flatten-list (list 'move move)))))
 
 (defun symex-ts--after-tree-modification ()
   "Handle any tree modification."
