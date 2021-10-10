@@ -84,23 +84,36 @@ a sibling or is the root."
           (symex-ts--ascend-to-parent-with-sibling parent))
       node)))
 
-(defun symex-ts--move-with-count (fn &optional count)
+(defun symex-ts--add-move (init-move move-delta)
+  "Add MOVE-DELTA to INIT-MOVE, each being a list with two integer
+elements."
+  (list (+ (nth 0 init-move) (nth 0 move-delta))
+        (+ (nth 1 init-move) (nth 1 move-delta))))
+
+(defun symex-ts--move-with-count (fn move-delta &optional count)
   "Move the point from the current node if possible.
 
 Movement is defined by FN, which should be a function which
 returns the appropriate neighbour node.
 
-Move COUNT times, defaulting to 1."
+Move COUNT times, defaulting to 1.
+
+Return a Symex move (list with x,y node offsets tagged with
+'move) or nil if no movement was performed."
   (let ((target-node nil)
+        (move '(0 0))
         (cursor (symex-ts-get-current-node)))
     (dotimes (_ (or count 1))
-      (setq cursor (or (funcall fn cursor) cursor))
-      (when cursor (setq target-node cursor)))
-    (when target-node (symex-ts--set-current-node target-node)))
+      (let ((new-node (funcall fn cursor)))
+        (when new-node
+          (setq move (symex-ts--add-move move move-delta))
+          (setq cursor new-node
+                target-node cursor))))
+    (when target-node (symex-ts--set-current-node target-node))
 
-  ;; Return nil to signal to Symex that the movement has been
-  ;; completed
-  nil)
+    ;; Return the Symex move that was executed, or nil to signify that
+    ;; the movement failed
+    (when (not (equal '(0 0) move)) (list 'move move))))
 
 (defun symex-ts--after-tree-modification ()
   "Handle any tree modification."
@@ -136,28 +149,28 @@ Automatically set it to the node at point if necessary."
 
 Move COUNT times, defaulting to 1."
   (interactive)
-  (symex-ts--move-with-count #'tsc-get-prev-named-sibling count))
+  (symex-ts--move-with-count #'tsc-get-prev-named-sibling '(-1 0) count))
 
 (defun symex-ts-move-next-sibling (&optional count)
   "Move the point to the current node's next sibling if possible.
 
 Move COUNT times, defaulting to 1."
   (interactive)
-  (symex-ts--move-with-count #'tsc-get-next-named-sibling count))
+  (symex-ts--move-with-count #'tsc-get-next-named-sibling '(1 0) count))
 
 (defun symex-ts-move-parent (&optional count)
   "Move the point to the current node's parent if possible.
 
 Move COUNT times, defaulting to 1."
   (interactive)
-  (symex-ts--move-with-count #'symex-ts--ascend-to-parent-with-sibling count))
+  (symex-ts--move-with-count #'symex-ts--ascend-to-parent-with-sibling '(0 -1) count))
 
 (defun symex-ts-move-child (&optional count)
   "Move the point to the current node's first child if possible.
 
 Move COUNT times, defaulting to 1."
   (interactive)
-  (symex-ts--move-with-count #'symex-ts--descend-to-child-with-sibling count))
+  (symex-ts--move-with-count #'symex-ts--descend-to-child-with-sibling '(0 1) count))
 
 (defun symex-ts-delete-node ()
   "Delete the current node."
