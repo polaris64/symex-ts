@@ -148,28 +148,28 @@ Automatically set it to the node at point if necessary."
   "Move the point to the current node's previous sibling if possible.
 
 Move COUNT times, defaulting to 1."
-  (interactive)
+  (interactive "p")
   (symex-ts--move-with-count #'tsc-get-prev-named-sibling '(-1 0) count))
 
 (defun symex-ts-move-next-sibling (&optional count)
   "Move the point to the current node's next sibling if possible.
 
 Move COUNT times, defaulting to 1."
-  (interactive)
+  (interactive "p")
   (symex-ts--move-with-count #'tsc-get-next-named-sibling '(1 0) count))
 
 (defun symex-ts-move-parent (&optional count)
   "Move the point to the current node's parent if possible.
 
 Move COUNT times, defaulting to 1."
-  (interactive)
+  (interactive "p")
   (symex-ts--move-with-count #'symex-ts--ascend-to-parent-with-sibling '(0 -1) count))
 
 (defun symex-ts-move-child (&optional count)
   "Move the point to the current node's first child if possible.
 
 Move COUNT times, defaulting to 1."
-  (interactive)
+  (interactive "p")
   (symex-ts--move-with-count #'symex-ts--descend-to-child-with-sibling '(0 1) count))
 
 (defun symex-ts-delete-node ()
