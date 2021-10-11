@@ -64,6 +64,20 @@ has the same start position."
             node))
       node)))
 
+(defun symex-ts--get-nth-sibling-from-node (src-node traversal-fn n)
+  "Return the N-th sibling node from SRC-NODE.
+
+TRAVERSAL-FN should be a function which returns the next node in
+the chain. For example, to get the node two positions prior to
+SRC-NODE, use `tsc-get-prev-named-sibling'.
+
+If N traversals cannot be completed (e.g. if N is 3 but there are
+only two more nodes), the last node is returned instead."
+  (let ((next-node (funcall traversal-fn src-node)))
+    (if (or (eq n 1) (not next-node))
+        src-node
+      (symex-ts--get-nth-sibling-from-node next-node traversal-fn (1- n)))))
+
 (defun symex-ts--descend-to-child-with-sibling (node)
   "Descend from NODE to first child recursively until the child
 node has a sibling or is a leaf."
@@ -172,12 +186,29 @@ Move COUNT times, defaulting to 1."
   (interactive "p")
   (symex-ts--move-with-count #'symex-ts--descend-to-child-with-sibling '(0 1) count))
 
-(defun symex-ts-delete-node ()
-  "Delete the current node."
-  (interactive)
-  (let* ((node (symex-ts-get-current-node))
+(defun symex-ts-delete-node-backward (&optional count)
+  "Delete COUNT nodes backward from the current node."
+  (interactive "p")
+  (let* ((count (or count 1))
+         (node (symex-ts-get-current-node))
+         (end-pos (tsc-node-end-position node))
+         (start-pos (tsc-node-start-position
+                     (if (> count 1)
+                         (symex-ts--get-nth-sibling-from-node node #'tsc-get-prev-named-sibling count)
+                       node))))
+    (delete-region start-pos end-pos))
+  (symex-ts--after-tree-modification))
+
+(defun symex-ts-delete-node-forward (&optional count)
+  "Delete COUNT nodes forward from the current node."
+  (interactive "p")
+  (let* ((count (or count 1))
+         (node (symex-ts-get-current-node))
          (start-pos (tsc-node-start-position node))
-         (end-pos (tsc-node-end-position node)))
+         (end-pos (tsc-node-end-position
+                   (if (> count 1)
+                       (symex-ts--get-nth-sibling-from-node node #'tsc-get-next-named-sibling count)
+                     node))))
     (delete-region start-pos end-pos))
   (symex-ts--after-tree-modification))
 
@@ -195,7 +226,8 @@ Move COUNT times, defaulting to 1."
   ("j" symex-ts-move-parent "parent")
   ("k" symex-ts-move-child "child")
   
-  ("x" symex-ts-delete-node "delete node"))
+  ("X" symex-ts-delete-node-backward "delete node (backward)")
+  ("x" symex-ts-delete-node-forward "delete node (forward)"))
 
 (defun symex-ts-launch ()
   "Start the Symex-TS hydra."
